@@ -3,37 +3,44 @@ Exercise 17.13 Re-Space
 
 
 """
+from shared.test import *
 
 
-def can_build(word, is_orig, dictionary):
-    if word in dictionary and not is_orig:
-        return True
+def maxMinutesUtil(appointments, index, memo):
+    if index >= len(appointments):
+        return 0
 
-    for i in range(len(word)):
-        if word[:i] in dictionary and can_build(word[i:], False, dictionary):
-            return True
-    return False
+    if memo[index] == 0:
+        with_next = appointments[index] + maxMinutesUtil(appointments, index + 2, memo)
+        without_next = maxMinutesUtil(appointments, index + 1, memo)
+        memo[index] = max(with_next, without_next)
+
+    return memo[index]
 
 
-def longest_word(worList):
-    dictionary = set(worList)
-    for word in sorted(worList, key=len, reverse=True):
-        if can_build(word, True, dictionary):
-            return word
+def maxMinutes(appointments):
+    memo = [0] * len(appointments)
+    return maxMinutesUtil(appointments, 0, memo)
 
-    return ''
+
+def maxMinutesIterative(appointments):
+    one_away = 0
+    two_away = 0
+    for i in range(len(appointments) - 1, -1, -1):
+        current = max(two_away + appointments[i], one_away)
+        two_away = one_away
+        one_away = current
+    return one_away
+
 
 
 if __name__ == "__main__":
-    dictionary = [
-        "cat",
-        "banana",
-        "dog",
-        "nana",
-        "walk",
-        "walker",
-        "dogwalker",
-        "dogwalkernan"
-    ]
-    print(f'longest word {longest_word(dictionary)}')
+    appointments = [30, 15, 60, 75, 45, 15, 15, 45]
+    check(180, maxMinutes(appointments))
+    appointments = [75, 105, 120, 75, 90, 135]
+    check(330, maxMinutes(appointments))
+    appointments = [30, 15, 60, 75, 45, 15, 15, 45]
+    check(180, maxMinutesIterative(appointments))
+    appointments = [75, 105, 120, 75, 90, 135]
+    check(330, maxMinutesIterative(appointments))
 

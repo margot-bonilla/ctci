@@ -1,10 +1,3 @@
-"""
-Exercise 17.13 Re-Space
-
-
-"""
-
-
 def can_build(word, is_orig, dictionary):
     if word in dictionary and not is_orig:
         return True

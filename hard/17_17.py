@@ -1,46 +1,53 @@
-"""
-Exercise 17.13 Re-Space
+from collections import defaultdict
 
 
-"""
-from shared.test import *
+class TrieNode:
+    def __init__(self, val):
+        self.val = val
+        self.children = dict()
+        self.is_final = False
 
 
-def maxMinutesUtil(appointments, index, memo):
-    if index >= len(appointments):
-        return 0
+class Trie:
+    def __init__(self):
+        self.root = TrieNode('*')
 
-    if memo[index] == 0:
-        with_next = appointments[index] + maxMinutesUtil(appointments, index + 2, memo)
-        without_next = maxMinutesUtil(appointments, index + 1, memo)
-        memo[index] = max(with_next, without_next)
+    def add(self, word):
+        node = self.root
+        for w in word:
+            if w not in node.children:
+                node.children[w] = TrieNode(w)
+            node = node.children[w]
+        node.is_final = True
 
-    return memo[index]
+    def find_strings_at_loc(self, word, start):
+        strings = []
+        index = start
+        node = self.root
+        while index < len(word):
+            if word[index] not in node.children:
+                break
 
+            node = node.children[word[index]]
+            if node.is_final:
+                strings.append(word[start:index+1])
+            index += 1
+        return strings
 
-def maxMinutes(appointments):
-    memo = [0] * len(appointments)
-    return maxMinutesUtil(appointments, 0, memo)
+    def search_all(self, word):
+        lookup = defaultdict(list)
 
-
-def maxMinutesIterative(appointments):
-    one_away = 0
-    two_away = 0
-    for i in range(len(appointments) - 1, -1, -1):
-        current = max(two_away + appointments[i], one_away)
-        two_away = one_away
-        one_away = current
-    return one_away
-
+        for i in range(len(word)):
+            strings = self.find_strings_at_loc(word, i)
+            for s in strings:
+                lookup[s].append(i)
+        return lookup
 
 
 if __name__ == "__main__":
-    appointments = [30, 15, 60, 75, 45, 15, 15, 45]
-    check(180, maxMinutes(appointments))
-    appointments = [75, 105, 120, 75, 90, 135]
-    check(330, maxMinutes(appointments))
-    appointments = [30, 15, 60, 75, 45, 15, 15, 45]
-    check(180, maxMinutesIterative(appointments))
-    appointments = [75, 105, 120, 75, 90, 135]
-    check(330, maxMinutesIterative(appointments))
-
+    T = ["ms", "si", "i"]
+    b = "mississipi"
+    trie = Trie()
+    for t in T:
+        trie.add(t)
+    print(trie.search_all(b))
